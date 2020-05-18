@@ -7,5 +7,5 @@ class ExerciseResponse(
     val count: Int?,
     val next: String?,
     val previous: String?,
-    @SerializedName("results") val results: List<Exercise>?
+    @SerializedName("results") val results: MutableList<Exercise>?
 )
