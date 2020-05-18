@@ -16,15 +16,13 @@ class ExerciseViewModel internal constructor(
     private val gymondoRepository: GymondoRepository
 ) : ViewModel() {
 
-    companion object {
-        private const val VISIBLE_THRESHOLD = 5
-    }
-
     val exerciseResponse: LiveData<List<Exercise>> = gymondoRepository.exerciseResponse
     val nekojResponse = gymondoRepository.responseExercise
     val exception: MutableLiveData<Exception> = gymondoRepository.exception
     var boolean: MutableLiveData<Boolean> = gymondoRepository.boolean
     val nextPage: MutableLiveData<String> = gymondoRepository.nextPage
+    val imageCount: MutableLiveData<Int> = gymondoRepository.imageCount
+    val exerciseCount: MutableLiveData<Int> = gymondoRepository.exerciseCount
 
 
     fun getExercises() {

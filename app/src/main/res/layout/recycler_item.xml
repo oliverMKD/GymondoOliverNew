@@ -18,7 +18,8 @@
             app:layout_constraintEnd_toStartOf="@id/exercise_all_data_text_view"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_broken_image_black_24dp" />
+            app:srcCompat="@drawable/ic_broken_image_black_24dp"
+            android:contentDescription="@string/image"/>
 
         <TextView
             android:id="@+id/exercise_all_data_text_view"

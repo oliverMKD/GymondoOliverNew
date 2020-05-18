@@ -7,5 +7,9 @@
     <string name="list">List</string>
     <string name="abs">abs</string>
     <string name="arms">Arms</string>
+    <string name="search">Search</string>
+    <string name="legs">Legs</string>
+    <string name="image">image</string>
+    <string name="loading">loading</string>
 
 </resources>
