@@ -1,6 +1,5 @@
 package com.oliver.gymondo.exercise.repositories
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.paging.PagedList
@@ -11,8 +10,10 @@ import com.oliver.gymondo.database.models.*
 import com.oliver.gymondo.network.GymondoApiService
 import com.oliver.gymondo.network.responses.ExerciseImageResponse
 import com.oliver.gymondo.network.responses.ExerciseResponse
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import retrofit2.Response
+import timber.log.Timber
 import javax.inject.Inject
 
 class GymondoRepository {
@@ -46,10 +47,9 @@ class GymondoRepository {
         val response = gymondoApiService.getExercises()
         withContext(Dispatchers.IO) {
             try {
-                Log.d("bbbb", "pocna exercise")
                 if (response!!.isSuccessful) {
                     for (exercise in response.body()!!.results!!) {
-                        exercise?.let {
+                        exercise.let {
                             gymondoDatabase.exerciseDao().insertExercise(exercise)
                             gymondoDatabase.exerciseDao()
                                 .insertNekoj(
@@ -65,15 +65,13 @@ class GymondoRepository {
                                 nextPage.value = response.body()?.next
                                 exerciseCount.value = response.body()?.count
                             }
-                            Log.d("bbbb", "pomina exercise")
                         }
                     }
                 } else {
-                    Log.d("bbbb", "exercise ne e successful")
+                    Timber.d("unsuccessful")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.d("bbbb", "first exer" + e)
                 withContext(Dispatchers.Main) {
                     exception.value = e
                 }
@@ -84,14 +82,11 @@ class GymondoRepository {
 
     suspend fun getCategory() {
         withContext(Dispatchers.IO) {
-            Log.d("bbbb", "category pocinja")
             try {
-                val category: MutableList<Muscle> = mutableListOf()
                 val categoryResponse = gymondoApiService.getCategory()
                 if (categoryResponse!!.isSuccessful) {
-                    Log.d("bbbb", "catwgory isSuccessful")
                     for (exCategory in categoryResponse.body()!!.results!!) {
-                        categoryResponse?.let {
+                        categoryResponse.let {
                             gymondoDatabase.exerciseDao().insertCategory(exCategory)
                             val exList = gymondoDatabase.exerciseDao().getExerciseCategory()
                             for (item in exList) {
@@ -113,11 +108,10 @@ class GymondoRepository {
                         }
                     }
                 } else {
-                    Log.d("bbbb", "category ne e successful")
+                    Timber.d("unsuccessful")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.d("bbbb", "category" + e)
                 withContext(Dispatchers.Main) {
                     exception.value = e
                 }
@@ -128,17 +122,13 @@ class GymondoRepository {
 
     suspend fun getMuscle() {
         withContext(Dispatchers.IO) {
-            Log.d("bbbb", "muscle pocinja")
             try {
-
                 val muscleResponse = gymondoApiService.getMuscle()
                 if (muscleResponse!!.isSuccessful) {
-                    Log.d("bbbb", "muscle isSuccessful")
                     for (muscle in muscleResponse.body()!!.results!!) {
-                        muscle?.let {
+                        muscle.let {
                             gymondoDatabase.exerciseDao().insertMuscle(muscle)
                             val exList = gymondoDatabase.exerciseDao().getExerciseCategory()
-                            val nekoj = gymondoDatabase.exerciseDao().getAllNekojList()
                             for (item in exList) {
                                 if (!item.muscles.isNullOrEmpty()) {
                                     for (i in item.muscles) {
@@ -152,8 +142,6 @@ class GymondoRepository {
                                                 break
 
                                             }
-
-
                                         }
                                     }
                                 }
@@ -164,11 +152,10 @@ class GymondoRepository {
                         }
                     }
                 } else {
-                    Log.d("bbbb", "muscle ne e successful")
+                    Timber.d("unsuccessful")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.d("bbbb", "muscle" + e)
                 withContext(Dispatchers.Main) {
                     exception.value = e
                 }
@@ -178,7 +165,6 @@ class GymondoRepository {
 
     suspend fun getEquipment() {
         withContext(Dispatchers.IO) {
-            Log.d("bbbb", "getEquipment pocinja")
             try {
                 val exList = gymondoDatabase.exerciseDao().getExerciseCategory()
                 val equipmentResponse = gymondoApiService.getEquipment()
@@ -186,9 +172,8 @@ class GymondoRepository {
                     for (item in exList) {
                         if (!item.equipment.isNullOrEmpty()) {
                             for (i in item.equipment) {
-                                Log.d("bbbb", "getEquipment isSuccessful")
                                 for (equipment in equipmentResponse.body()!!.results!!) {
-                                    equipment?.let {
+                                    equipment.let {
                                         gymondoDatabase.exerciseDao().insertEquipment(equipment)
                                         if (i == equipment.id) {
                                             newEqList.add(equipment)
@@ -222,11 +207,10 @@ class GymondoRepository {
                     }
 
                 } else {
-                    Log.d("bbbb", "getEquipment ne e successful")
+                    Timber.d("unsuccessful")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.d("bbbb", "getEquipment" + e)
                 withContext(Dispatchers.Main) {
                     exception.value = e
                 }
@@ -238,11 +222,9 @@ class GymondoRepository {
         val response = gymondoApiService.getImage()
         withContext(Dispatchers.IO) {
             try {
-                Log.d("bbbb", "image pocinja")
                 if (response!!.isSuccessful) {
-                    Log.d("bbbb", "image isSuccessful")
                     for (exercise in response.body()!!.results!!) {
-                        exercise?.let {
+                        exercise.let {
                             gymondoDatabase.exerciseDao().insertImage(exercise)
                         }
                     }
@@ -250,11 +232,10 @@ class GymondoRepository {
                         imageCount.value = response.body()?.count
                     }
                 } else {
-                    Log.d("bbbb", "image ne e successful")
+                    Timber.d("unsuccessful")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.d("bbbb", "prv image" + e)
                 withContext(Dispatchers.Main) {
                     exception.value = e
                 }
@@ -267,24 +248,21 @@ class GymondoRepository {
         val response = gymondoApiService.getNextImage(next)
         withContext(Dispatchers.IO) {
             try {
-                Log.d("bbbb", "NextImage pocinja")
                 if (response!!.isSuccessful) {
-                    Log.d("bbbb", "NextImage isSuccessful")
                     for (exercise in response.body()?.results!!) {
                         exercise.let {
                             gymondoDatabase.exerciseDao().insertImage(exercise)
-                            Log.d("bbbb", "ima nextImage pocinja" + response.body()!!.next!!)
                         }
                     }
-                    if (!response.body()!!.next.isNullOrEmpty())
+                    if (!response.body()!!.next.isNullOrEmpty()) {
                         getNextImage(response.body()?.next!!)
-                    Log.d("bbbb", "ima nextImage pocinja" + response.body()!!.next!!)
+                    }
+                    Timber.d("nextImage")
                 } else {
-                    Log.d("bbbb", "image ne e successful")
+                    Timber.d("unsuccessful")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.d("bbbb", "next image" + e)
                 withContext(Dispatchers.Main) {
                     exception.value = e
                 }
@@ -302,9 +280,7 @@ class GymondoRepository {
             val images = gymondoDatabase.exerciseDao().getImageList()
             val modelList = gymondoDatabase.exerciseDao().getAllNekojList()
             try {
-                Log.d("bbbb", "pocna next exercise")
                 if (response!!.isSuccessful) {
-                    Log.d("bbbb", " next exercise isSuccessful")
                     for (exercise in response.body()!!.results!!) {
                         for (c in category) {
                             if (exercise.category == c.category_id) {
@@ -317,13 +293,9 @@ class GymondoRepository {
                                             c
                                         )
                                     )
-                                Log.d("bbbb", " next exercise categorija zavrseno" )
-
                             }
                         }
                         for (muscle in muscles) {
-                            val exList = gymondoDatabase.exerciseDao().getExerciseCategory()
-                            val nekoj = gymondoDatabase.exerciseDao().getAllNekojList()
                             if (!exercise.muscles.isNullOrEmpty()) {
                                 for (i in exercise.muscles) {
                                     if (i == muscle.id) {
@@ -334,8 +306,6 @@ class GymondoRepository {
                                             )
                                             newMuscleList.clear()
                                             break
-                                            Log.d("bbbb", " next exercise muskuli zavrseno" )
-
                                         }
                                     }
                                 }
@@ -351,8 +321,6 @@ class GymondoRepository {
                                                 newEqList, exercise.description!!
                                             )
                                             newEqList.clear()
-                                            Log.d("bbbb", " next exercise oprema zavrseno" )
-
                                         }
                                     }
 
@@ -367,8 +335,6 @@ class GymondoRepository {
                                         .updateImages(newImageList, i.description!!)
                                     newImageList.clear()
                                 }
-                                Log.d("bbbb", " next exercise sliki zavrseno" )
-
                             }
                         }
                         withContext(Dispatchers.Main) {
@@ -377,11 +343,10 @@ class GymondoRepository {
                         }
                     }
                 } else {
-                    Log.d("bbbb", "exercise ne e successful")
+                    Timber.d("unsuccessful")
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                Log.d("bbbb", "next exer" + e)
                 withContext(Dispatchers.Main) {
                     exception.value = e
                 }

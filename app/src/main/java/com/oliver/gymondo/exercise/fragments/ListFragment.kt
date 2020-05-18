@@ -55,7 +55,7 @@ class ListFragment : BaseFragment(), SectionAdapter.Interaction {
         val binding = FragmentListBinding.inflate(inflater, container, false)
 
         context ?: return binding.root
-        setHasOptionsMenu(true);
+        setHasOptionsMenu(true)
         DaggerExerciseComponent.builder().exerciseModule(ExerciseModule()).build().inject(this)
         gymondoDatabase = GymondoDatabase.getInstance(context!!)
         binding.included.fabSetting.setOnClickListener {
@@ -93,13 +93,10 @@ class ListFragment : BaseFragment(), SectionAdapter.Interaction {
                                     async { exerciseViewModel.getNexExercises(next!!) }
                                 test.await().apply {
                                     exerciseViewModel.boolean.observe(viewLifecycleOwner) {
-                                        Log.d("bbbb", "boolean e :" + it)
                                         if (it == true) {
                                             observeData(adapter)
                                             p.dismiss()
-
                                         }
-
                                     }
                                 }
                             }
@@ -115,7 +112,6 @@ class ListFragment : BaseFragment(), SectionAdapter.Interaction {
             p.show()
             val one = async { exerciseViewModel.getExercises() }
             exerciseViewModel.boolean.observe(viewLifecycleOwner) {
-                Log.d("bbbb", "boolean e :" + it)
                 if (it == true) {
                     binding.loadingImage.visibility = View.GONE
                     binding.recyclerView.visibility = View.VISIBLE
@@ -217,29 +213,29 @@ class ListFragment : BaseFragment(), SectionAdapter.Interaction {
         scope.launch {
             val i = gymondoDatabase.exerciseDao().searchByCategoryName("Abs").toLiveData(20)
             i.observe(viewLifecycleOwner) { pagedList ->
-                view!!.layoutFabAbs.setOnClickListener(View.OnClickListener {
+                view!!.layoutFabAbs.setOnClickListener {
                     adapter.submitList(pagedList)
                     fabUsed = true
-                })
+                }
             }
         }
         scope.launch {
             val i = gymondoDatabase.exerciseDao().searchByCategoryName("Arms").toLiveData(20)
             i.observe(viewLifecycleOwner) { pagedList ->
-                view!!.layoutFabArms.setOnClickListener(View.OnClickListener {
+                view!!.layoutFabArms.setOnClickListener {
                     adapter.submitList(pagedList)
                     fabUsed = true
-                })
+                }
             }
 
         }
         scope.launch {
             val i = gymondoDatabase.exerciseDao().searchByCategoryName("Legs").toLiveData(20)
             i.observe(viewLifecycleOwner) { pagedList ->
-                view!!.layoutFabLegs.setOnClickListener(View.OnClickListener {
+                view!!.layoutFabLegs.setOnClickListener {
                     adapter.submitList(pagedList)
                     fabUsed = true
-                })
+                }
             }
         }
     }
