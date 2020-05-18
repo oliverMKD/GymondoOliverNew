@@ -6,11 +6,13 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.AbsListView
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.MenuItemCompat.getActionView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
 import androidx.paging.toLiveData
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.oliver.gymondo.R
 import com.oliver.gymondo.database.GymondoDatabase
@@ -22,6 +24,7 @@ import com.oliver.gymondo.exercise.components.DaggerExerciseComponent
 import com.oliver.gymondo.exercise.modules.ExerciseModule
 import com.oliver.gymondo.exercise.viewmodels.ExerciseViewModel
 import com.oliver.gymondo.exercise.viewmodels.ExerciseViewModelFactory
+import kotlinx.android.synthetic.main.fragment_list.view.*
 import kotlinx.android.synthetic.main.layout_fab_submenu.view.*
 import kotlinx.coroutines.*
 import java.util.*
@@ -70,42 +73,6 @@ class ListFragment : BaseFragment(), SectionAdapter.Interaction {
             binding.recyclerView.layoutManager as androidx.recyclerview.widget.LinearLayoutManager
         binding.recyclerView.setHasFixedSize(true)
         binding.recyclerView.adapter = adapter
-
-        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-
-//                if (dy > 0) {
-                    val visibleItemCount = layoutManager.childCount
-                    val pastVisibleItem = layoutManager.findFirstCompletelyVisibleItemPosition()
-                    val total = adapter.itemCount
-
-                    if (!isLoading) {
-
-                        if ((visibleItemCount + pastVisibleItem) >= total) {
-                            page++
-                            scope.launch {
-                                val p = ProgressDialog(context)
-                                p.setMessage("Loading...")
-                                p.show()
-                                isLoading = true
-                                val next = exerciseViewModel.nextPage.value
-                                val test =
-                                    async { exerciseViewModel.getNexExercises(next!!) }
-                                test.await().apply {
-                                    exerciseViewModel.boolean.observe(viewLifecycleOwner) {
-                                        if (it == true) {
-                                            observeData(adapter)
-                                            p.dismiss()
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    super.onScrolled(recyclerView, dx, dy)
-                }
-//            }
-        })
         scope.launch {
             val p = ProgressDialog(context)
             p.setMessage("Loading...")
@@ -123,9 +90,55 @@ class ListFragment : BaseFragment(), SectionAdapter.Interaction {
             }
         }
         filterByBodyParts()
+        binding.recyclerView.addOnScrollListener(newScrollListener)
+
         return binding.root
 
     }
+    var isLoadingList = false
+    var isLastPage = false
+    var isScrolling = false
+
+    private val newScrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+
+            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+            val visibleItemCount = layoutManager.childCount
+            val totalItemCount = layoutManager.itemCount
+
+            val isNotLoadingAndNotLastPage = !isLoadingList && !isLastPage
+            val isAtLastItem = firstVisibleItemPosition + visibleItemCount >= totalItemCount
+            val isNotAtBeginning = firstVisibleItemPosition >= 0
+            val isTotalMoreThanVisible = totalItemCount >= 20
+            val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
+                    isTotalMoreThanVisible && isScrolling
+            if(shouldPaginate) {
+                val next = exerciseViewModel.nextPage.value
+                scope.launch {
+                    val response = async {
+                        exerciseViewModel.getNexExercises(next!!)
+                    }
+                    val totalPages = response.await().body()?.count!! / 20 + 2
+                    isLastPage = exerciseViewModel.page == totalPages
+                    observeData(adapter)
+
+                }
+                isScrolling = false
+            } else {
+                view!!.recycler_view.setPadding(0, 0, 0, 0)
+            }
+        }
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            super.onScrollStateChanged(recyclerView, newState)
+            if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+                isScrolling = true
+            }
+        }
+    }
+
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(
