@@ -22,7 +22,6 @@ import com.oliver.gymondo.exercise.components.DaggerExerciseComponent
 import com.oliver.gymondo.exercise.modules.ExerciseModule
 import com.oliver.gymondo.exercise.viewmodels.ExerciseViewModel
 import com.oliver.gymondo.exercise.viewmodels.ExerciseViewModelFactory
-import kotlinx.android.synthetic.main.fragment_list.view.*
 import kotlinx.android.synthetic.main.layout_fab_submenu.view.*
 import kotlinx.coroutines.*
 import java.util.*
@@ -134,7 +133,7 @@ class ListFragment : BaseFragment(), SectionAdapter.Interaction {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(
-            R.menu.bottom_navigation_menu,
+            R.menu.search_menu,
             menu
         ) // Put your search menu in "menu_search" menu file.
         mSearchItem = menu.findItem(R.id.action_search)

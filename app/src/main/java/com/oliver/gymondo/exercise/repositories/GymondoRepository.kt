@@ -38,6 +38,9 @@ class GymondoRepository {
     private val newMuscleList: MutableList<Muscle> = mutableListOf()
     private val newEqList: MutableList<Equipment> = mutableListOf()
     private val newImageList: MutableList<ExerciseImage> = mutableListOf()
+    val imageCount = MutableLiveData<Int>()
+    val exerciseCount = MutableLiveData<Int>()
+
 
     suspend fun getExercises(): Response<ExerciseResponse> {
         val response = gymondoApiService.getExercises()
@@ -60,6 +63,7 @@ class GymondoRepository {
                             withContext(Dispatchers.Main) {
                                 boolean.value = false
                                 nextPage.value = response.body()?.next
+                                exerciseCount.value = response.body()?.count
                             }
                             Log.d("bbbb", "pomina exercise")
                         }
@@ -241,6 +245,9 @@ class GymondoRepository {
                         exercise?.let {
                             gymondoDatabase.exerciseDao().insertImage(exercise)
                         }
+                    }
+                    withContext(Dispatchers.Main) {
+                        imageCount.value = response.body()?.count
                     }
                 } else {
                     Log.d("bbbb", "image ne e successful")
