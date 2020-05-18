@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Gymondo</string>
+    <string name="title_activity">Gymondo</string>
+
+    <string name="no_internet_connection">No internet connection</string>
+
+    <string name="list">List</string>
+    <string name="abs">abs</string>
+    <string name="arms">Arms</string>
+
+</resources>
